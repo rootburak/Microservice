@@ -1,53 +1,52 @@
 from fastapi import Depends,HTTPException,status
-from ..database import session
-from ..schemas import AddBlog,DeleteBlog,UpdateBlog
-from sqlalchemy import Session
+from database import session
+from schemas import addBlog,deleteBlog,updateBlog,getBlog
+from sqlalchemy.orm import Session
     
-def dbaccess():
-    db = session()
-    try:
-        yield db
-    except:
-        db.close()
+
+class Blog():
+    def __init__(self, db):
+        self.db = db
+    def addBlog(self,model,schema:addBlog):
+        try:
+            newBlog = model(header=schema.header,content=schema.content)
+            self.db.add(newBlog)
+            self.db.commit()
+            return schema
+        except Exception as e:
+            self.db.rollback()
+            error = e.args[0]
+            return HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=error)
 
 
-def addBlog(model,schema:AddBlog, db:Session = Depends(dbaccess)):
-    try:
-        newBlog = model(header=schema.header,content=schema.content)
-        db.save(newBlog)
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        error = e.args[0]
-        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=error)
+    def deleteBlog(self,model,schema:deleteBlog):
+        try:
+            blog = self.db.query(model).filter(model.id == schema.id).first()
+            if blog:
+                self.db.delete(blog)
+                self.db.commit()
+                return schema
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
+        except Exception as e:
+            self.db.rollback()
+            error = e.args[0]
+            return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
 
-
-def deleteBlog(model,schema:DeleteBlog, db:Session = Depends(dbaccess)):
-    try:
-        blog = db.query(model).filter(model.id == schema.id).first()
-        if blog:
-            db.delete(blog)
-            db.commit()
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
-    except Exception as e:
-        db.rollback()
-        error = e.args[0]
-        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
-
-def updateBlog(model,schema:UpdateBlog, db:Session = Depends(dbaccess)):
-    try:
-        blog = db.query(model).filter(model.id == schema.id).first()
-        if blog:
-            blog.header = schema.header
-            blog.content = schema.content
-            db.commit()
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
-    except Exception as e:
-        db.rollback()
-        error = e.args[0]
-        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
+    def updateBlog(self,model,schema:updateBlog):
+        try:
+            blog = self.db.query(model).filter(model.id == schema.id).first()
+            if blog:
+                blog.header = schema.header
+                blog.content = schema.content
+                self.db.commit()
+                return schema
+            else:
+                return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
+        except Exception as e:
+            self.db.rollback()
+            error = e.args[0]
+            return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
 
 
 

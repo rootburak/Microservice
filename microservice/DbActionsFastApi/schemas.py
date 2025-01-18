@@ -1,17 +1,25 @@
 from pydantic import BaseModel
 
-class AddBlog(BaseModel):
+class addBlog(BaseModel):
     header:str
     content:str
-class DeleteBlog(BaseModel):
+    class Config:
+        orm_mode = True
+class deleteBlog(BaseModel):
     id:int
+    class Config:
+        orm_mode = True
+class updateBlog(BaseModel):
+    id:int
+    header:str
+    content:str
+    class Config:
+        orm_mode = True
 
-class UpdateBlog(BaseModel):
+class getBlog(BaseModel):
     id:int
     header:str
     content:str
-class GetBlog(BaseModel):
-    id:int
-    header:str
-    content:str
+    class Config:
+        orm_mode = True
 
