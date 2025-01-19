@@ -1,11 +1,10 @@
 from flask import Flask,render_template
 from flask_cors import CORS
-import os
 
 
 app = Flask(__name__,
-            template_folder=os.path.abspath('../templates'), 
-            static_folder=os.path.abspath('../static'))
+            template_folder='templates', 
+            static_folder='static')
 CORS(app)
 
 @app.route("/")
