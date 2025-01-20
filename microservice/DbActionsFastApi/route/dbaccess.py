@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Depends
-from schemas import addBlog,deleteBlog,getBlog,updateBlog
-from repository.dbaccesRepo import Blog
+from schemas import allBlogs,addBlog,deleteBlog,getBlog,getById
+from repository.dbaccesRepo import RepoBlog
 from model import AddBlog 
 from database import session
 from sqlalchemy.orm import Session
@@ -17,24 +17,26 @@ def dbaccess():
 
 @router.post("/new-blog",response_model=addBlog)
 def addblogDef(schema:addBlog,db:Session=Depends(dbaccess)):
-    blog_repo = Blog(db = db)
-    return blog_repo.addBlog(model=Blog, schema=schema)
+    blog_repo = RepoBlog(db = db)
+    return blog_repo.addBlog(model=AddBlog, schema=schema)
 
     
-@router.delete("/delete-blog",response_model=deleteBlog)
-def deleteBlogDef(blog:deleteBlog,db:Session=Depends(dbaccess)):
-    blog_repo = Blog(db)
-    return blog_repo.deleteBlog(model=AddBlog, schema=blog)
+@router.delete("/delete-blog/{id}")
+def deleteBlogDef(id,db:Session=Depends(dbaccess)):
+    blog_repo = RepoBlog(db)
+    return blog_repo.deleteBlog(model=AddBlog,id=id)
 
-@router.put("/update-blog",response_model=updateBlog)
-def updateBlogDef(blog:updateBlog,db:Session=Depends(dbaccess)):
-    pass
+@router.put("/update-blog/{id}")
+def updateBlogDef(id,blog:addBlog,db:Session=Depends(dbaccess)):
+    blog_repo = RepoBlog(db)
+    return blog_repo.updateBlog(model=AddBlog,schema=blog,id=id)
 
-@router.get("/get-blog-by-id",response_model=getBlog)
-def get_post_by_id():
-    pass
-
-@router.get("/get-blogs",response_model=getBlog)
-def get_posts():
-    pass
+@router.get("/get-blog-by-id/{id}")
+def get_post_by_id(id,db:Session=Depends(dbaccess)):
+    blog_repo=RepoBlog(db)
+    return blog_repo.getBlog(model=AddBlog,id=id)
+@router.get("/get-blogs")
+def getAllBlogs(db:Session=Depends(dbaccess)):
+    blog_repo=RepoBlog(db) 
+    return blog_repo.allBlogs(model=AddBlog) 
 

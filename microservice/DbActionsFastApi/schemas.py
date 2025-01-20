@@ -9,12 +9,6 @@ class deleteBlog(BaseModel):
     id:int
     class Config:
         orm_mode = True
-class updateBlog(BaseModel):
-    id:int
-    header:str
-    content:str
-    class Config:
-        orm_mode = True
 
 class getBlog(BaseModel):
     id:int
@@ -22,4 +16,8 @@ class getBlog(BaseModel):
     content:str
     class Config:
         orm_mode = True
-
+class allBlogs(BaseModel):
+    header:str
+    content:str
+class getById(BaseModel):
+    id:int
